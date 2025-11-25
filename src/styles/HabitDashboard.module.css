@@ -12,6 +12,21 @@
     margin-bottom: 2rem;
 }
 
+.title {
+    font-size: 2.5rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    color: var(--secondary);
+    font-size: 1.1rem;
+}
+
 .habitList {
     display: flex;
     flex-direction: column;
@@ -76,6 +91,24 @@
     color: var(--danger);
 }
 
+.habitDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.9rem;
+    color: var(--foreground);
+}
+
+.detailItem {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.detailLabel {
+    font-weight: 600;
+    color: var(--secondary);
+}
+
 .habitStats {
     display: flex;
     align-items: center;
@@ -132,4 +165,39 @@
 
 .deleteBtn:hover {
     color: var(--danger);
+}
+
+/* Check-in Form Styles */
+.checkInForm {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.checkInInput {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.5rem;
+    font-family: inherit;
+}
+
+.checkInSubmitBtn {
+    background: var(--success);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.checkInCancelBtn {
+    background: var(--secondary);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
 }

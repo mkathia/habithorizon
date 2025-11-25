@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import styles from '../styles/HabitForm.module.css';
-import { useHabitStore, HabitType } from '../lib/store';
+import { useHabitStore, HabitType, TrackingType } from '../lib/store';
 
 export const HabitForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
     const addHabit = useHabitStore((state) => state.addHabit);
 
     const [name, setName] = useState('');
     const [type, setType] = useState<HabitType>('build');
+    const [trackingType, setTrackingType] = useState<TrackingType>('boolean');
     const [goal, setGoal] = useState('');
     const [frequency, setFrequency] = useState('');
     const [why, setWhy] = useState('');
@@ -18,6 +19,7 @@ export const HabitForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         addHabit({
             name,
             type,
+            trackingType,
             goal,
             frequency,
             why,
@@ -59,6 +61,37 @@ export const HabitForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                         <option value="build">Build (Start doing)</option>
                         <option value="break">Break (Stop doing)</option>
                     </select>
+                </div>
+
+                <div className={styles.formGroup}>
+                    <label className={styles.label}>Tracking Method</label>
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '0.5rem' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                            <input
+                                type="radio"
+                                name="trackingType"
+                                value="boolean"
+                                checked={trackingType === 'boolean'}
+                                onChange={() => setTrackingType('boolean')}
+                            />
+                            Simple Check-in (Yes/No)
+                        </label>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                            <input
+                                type="radio"
+                                name="trackingType"
+                                value="metric"
+                                checked={trackingType === 'metric'}
+                                onChange={() => setTrackingType('metric')}
+                            />
+                            Value Tracking (e.g. Count)
+                        </label>
+                    </div>
+                    <small style={{ color: 'var(--secondary)', display: 'block', marginTop: '0.25rem' }}>
+                        {trackingType === 'boolean'
+                            ? "Just a simple button to mark as done."
+                            : "Enter a number value each time you check in."}
+                    </small>
                 </div>
 
                 <div className={styles.formGroup}>

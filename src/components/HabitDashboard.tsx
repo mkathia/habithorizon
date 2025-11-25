@@ -3,6 +3,7 @@ import styles from '../styles/HabitDashboard.module.css';
 import { useHabitStore } from '../lib/store';
 import { HabitCard } from './HabitCard';
 import { HabitForm } from './HabitForm';
+import { DevControls } from './DevControls';
 
 export const HabitDashboard: React.FC = () => {
     const habits = useHabitStore((state) => state.habits);
@@ -18,6 +19,7 @@ export const HabitDashboard: React.FC = () => {
 
     return (
         <div className={styles.dashboardContainer}>
+            <DevControls />
             <header className={styles.header}>
                 <h1 className={styles.title}>Habit Horizon</h1>
                 <p className={styles.subtitle}>Build the life you dream of, one small step at a time.</p>
