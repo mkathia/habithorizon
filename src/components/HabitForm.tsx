@@ -21,7 +21,8 @@ export const HabitForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
             type,
             trackingType,
             goal,
-            frequency,
+            frequencyDays: parseInt(frequency) || 1,
+            frequency: `Every ${frequency} day(s)`,
             why,
         });
 
@@ -108,20 +109,21 @@ export const HabitForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
                 </div>
 
                 <div className={styles.formGroup}>
-                    <label className={styles.label} htmlFor="frequency">Frequency</label>
+                    <label className={styles.label} htmlFor="frequency">Frequency (Every N Days)</label>
                     <input
                         id="frequency"
                         className={styles.input}
-                        type="text"
+                        type="number"
+                        min="1"
                         value={frequency}
                         onChange={(e) => setFrequency(e.target.value)}
-                        placeholder={type === 'build' ? "e.g. Daily at 7am" : "e.g. Reduce by 1 per week"}
+                        placeholder="e.g. 1 for Daily, 3 for every 3 days"
                         required
                     />
                     <small style={{ color: 'var(--secondary)', display: 'block', marginTop: '0.25rem' }}>
                         {type === 'build'
-                            ? "How often do you want to do this?"
-                            : "How will you scale down from your current habit?"}
+                            ? "How often do you want to do this? (1 = Daily)"
+                            : "How many days between allowed check-ins?"}
                     </small>
                 </div>
 

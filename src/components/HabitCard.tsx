@@ -15,7 +15,27 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
     const [checkInValue, setCheckInValue] = useState('');
 
     const isCheckedIn = habit.history.some(h => h.date === simulatedDate);
-    const currentStreak = calculateStreak(habit.history, simulatedDate);
+    const currentStreak = calculateStreak(habit.history, simulatedDate, habit.frequencyDays || 1);
+
+    // Frequency enforcement logic
+    const canCheckIn = () => {
+        if (isCheckedIn) return false;
+        if (!habit.lastCheckedIn) return true;
+
+        const lastDate = new Date(habit.lastCheckedIn);
+        const currentDate = new Date(simulatedDate);
+        const diffTime = currentDate.getTime() - lastDate.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+        // If frequency is 1 (daily), we can check in if diffDays >= 1 (i.e. it's a new day)
+        // If frequency is 3, we can check in if diffDays >= 3.
+        return diffDays >= (habit.frequencyDays || 1);
+    };
+
+    const isCheckInAllowed = canCheckIn();
+    const daysUntilCheckIn = habit.lastCheckedIn
+        ? (habit.frequencyDays || 1) - Math.ceil((new Date(simulatedDate).getTime() - new Date(habit.lastCheckedIn).getTime()) / (1000 * 60 * 60 * 24))
+        : 0;
 
     const handleCheckInSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -60,7 +80,7 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
 
             <div className={styles.habitStats}>
                 <div className={styles.streak}>
-                    🔥 {currentStreak} Day Streak
+                    🔥 {currentStreak}x Streak
                 </div>
             </div>
 
@@ -96,20 +116,22 @@ export const HabitCard: React.FC<HabitCardProps> = ({ habit }) => {
                         <button
                             className={styles.checkInBtn}
                             onClick={() => setIsCheckInOpen(true)}
-                            disabled={isCheckedIn}
-                            style={{ width: '100%' }}
+                            disabled={!isCheckInAllowed}
+                            style={{ width: '100%', opacity: !isCheckInAllowed ? 0.5 : 1, cursor: !isCheckInAllowed ? 'not-allowed' : 'pointer' }}
+                            title={!isCheckInAllowed && isCheckedIn ? "Already checked in" : !isCheckInAllowed ? `Next check-in in ${daysUntilCheckIn} day(s)` : ""}
                         >
-                            {isCheckedIn ? 'Checked In! ✅' : 'Check In'}
+                            {isCheckedIn ? 'Checked In! ✅' : !isCheckInAllowed ? `Wait ${daysUntilCheckIn}d` : 'Check In'}
                         </button>
                     )
                 ) : (
                     <button
                         className={styles.checkInBtn}
                         onClick={handleBooleanCheckIn}
-                        disabled={isCheckedIn}
-                        style={{ width: '100%' }}
+                        disabled={!isCheckInAllowed}
+                        style={{ width: '100%', opacity: !isCheckInAllowed ? 0.5 : 1, cursor: !isCheckInAllowed ? 'not-allowed' : 'pointer' }}
+                        title={!isCheckInAllowed && isCheckedIn ? "Already checked in" : !isCheckInAllowed ? `Next check-in in ${daysUntilCheckIn} day(s)` : ""}
                     >
-                        {isCheckedIn ? 'Checked In! ✅' : 'Check In'}
+                        {isCheckedIn ? 'Checked In! ✅' : !isCheckInAllowed ? `Wait ${daysUntilCheckIn}d` : 'Check In'}
                     </button>
                 )}
             </div>

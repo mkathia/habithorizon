@@ -15,7 +15,8 @@ export interface Habit {
     type: HabitType;
     trackingType: TrackingType;
     goal: string;
-    frequency: string;
+    frequencyDays: number; // Interval in days (1 = daily, 2 = every other day, etc.)
+    frequency: string; // Display string
     why: string;
     streak: number;
     lastCheckedIn: string | null;
@@ -32,27 +33,43 @@ interface HabitState {
 }
 
 // Helper to calculate streak
-export const calculateStreak = (history: CheckInRecord[], currentDate: string): number => {
+export const calculateStreak = (history: CheckInRecord[], currentDate: string, frequencyDays: number): number => {
     if (history.length === 0) return 0;
 
     // Sort history by date descending
     const sortedHistory = [...history].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
-    // Check if checked in today
-    const todayRecord = sortedHistory.find(h => h.date === currentDate);
-    let streak = todayRecord ? 1 : 0;
+    // Filter out future check-ins relative to currentDate
+    const validHistory = sortedHistory.filter(h => h.date <= currentDate);
+    if (validHistory.length === 0) return 0;
 
-    // Start checking from yesterday (relative to currentDate)
-    let checkDate = new Date(currentDate);
-    checkDate.setDate(checkDate.getDate() - 1);
+    const mostRecent = validHistory[0];
+    const mostRecentDate = new Date(mostRecent.date);
+    const current = new Date(currentDate);
 
-    while (true) {
-        const checkDateStr = checkDate.toISOString().split('T')[0];
-        const hasRecord = sortedHistory.some(h => h.date === checkDateStr);
+    // Calculate days since last check-in
+    const diffTime = Math.abs(current.getTime() - mostRecentDate.getTime());
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-        if (hasRecord) {
+    // If we haven't checked in within the frequency window, streak is broken.
+    // Note: diffDays = 0 means we checked in today.
+    // If frequency is 1 (daily), and diffDays is 1 (yesterday), streak is kept.
+    // If frequency is 1, and diffDays is 2 (missed a day), streak is broken.
+    // So if diffDays > frequencyDays, streak is broken.
+    if (diffDays > frequencyDays) return 0;
+
+    let streak = 1;
+    let previousDate = mostRecentDate;
+
+    for (let i = 1; i < validHistory.length; i++) {
+        const entryDate = new Date(validHistory[i].date);
+        const gapTime = Math.abs(previousDate.getTime() - entryDate.getTime());
+        const gapDays = Math.ceil(gapTime / (1000 * 60 * 60 * 24));
+
+        // The gap between check-ins must be <= frequencyDays to maintain streak
+        if (gapDays <= frequencyDays) {
             streak++;
-            checkDate.setDate(checkDate.getDate() - 1);
+            previousDate = entryDate;
         } else {
             break;
         }
@@ -95,7 +112,9 @@ export const useHabitStore = create<HabitState>()(
                             newHistory = [...habit.history, { date: currentDate, value }];
                         }
 
-                        const newStreak = calculateStreak(newHistory, currentDate);
+                        // Use the habit's frequencyDays (default to 1 if undefined for migration safety)
+                        const freq = habit.frequencyDays || 1;
+                        const newStreak = calculateStreak(newHistory, currentDate, freq);
 
                         return {
                             ...habit,
